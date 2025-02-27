@@ -1,0 +1,57 @@
+# Ignore build output directories
+bin/
+obj/
+Debug/
+Release/
+
+# Ignore Visual Studio files
+.vs/
+*.suo
+*.user
+*.cache
+*.pdb
+*.tlog
+*.VC.db
+
+# Ignore Rider files
+.idea/
+*.sln.iml
+
+# Ignore VS Code workspace settings
+.vscode/
+
+# Ignore dependency-related files
+packages/
+project.lock.json
+project.assets.json
+*.nupkg
+
+# Ignore compiled files
+*.dll
+*.exe
+*.mdb
+
+# Ignore logs & temp files
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+
+# Ignore environment variable files
+.env
+.env.local
+
+# Ignore JetBrains Rider IDE settings
+.idea/
+
+# Ignore Resharper files
+_ReSharper.Caches/
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore Windows system files
+Thumbs.db
+desktop.ini
