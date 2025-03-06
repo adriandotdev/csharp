@@ -17,7 +17,18 @@ public class ProductRepository : BaseRepository, IProductRepository
         return this.productManagementContext.Categories.ToList();
     }
 
-    public List<Product> GetProducts(int pageNumber = 1, int pageSize = 10) {
-        return this.productManagementContext.Products.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+    public dynamic GetProducts(int pageNumber = 1, int pageSize = 10) {
+
+        var products = this.productManagementContext.Products
+            .OrderBy(product => product.Id)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+        var totalProducts = this.productManagementContext.Products.Count();
+
+        return new {
+            products,
+            totalProducts
+        };
     }
 }

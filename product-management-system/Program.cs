@@ -1,4 +1,6 @@
-﻿using ProductManagementContext context = new ProductManagementContext();
+﻿using System.Globalization;
+
+using ProductManagementContext context = new ProductManagementContext();
 
 ProductRepository productRepository = new();
 
@@ -32,7 +34,6 @@ while (loggedInUser == null) {
 
 
     Console.WriteLine("\nSuccessfully logged in!");
-    Thread.Sleep(2000);
 }
 
 string response = "";
@@ -42,11 +43,10 @@ Console.Clear();
 Console.WriteLine("Please wait...");
 Thread.Sleep(1000);
 Console.Clear();
-Console.WriteLine(title);
 
 do {
-
-    Console.WriteLine("\n1.) New Product\n2.) View Products\n3.) Exit\n");
+    Console.Clear();
+    Console.WriteLine("\nDashboard\n1.) New Product\n2.) View Products\n3.) Logout\n");
     Console.Write("Choose: ");
     int.TryParse(Console.ReadLine(), out int choice);
 
@@ -82,27 +82,41 @@ do {
                 Thread.Sleep(1500);
             }
            
-
             break;
         case 2:
             Console.Clear();
 
             string? viewExit = "";
+            int pageNumber = 1;
+            int pageSize = 10;
+
             do {
                 Console.WriteLine("\nProducts\n");
-                productRepository.GetProducts().ForEach(product => {
+                var products = productRepository.GetProducts(pageNumber, pageSize);
+           
+                DisplayProducts(products.products);
 
-                    Console.WriteLine($"{product.Id}.) {product.Name} - {product.Price}");
-                });
+                Console.WriteLine($"Page {pageNumber} of {CalculateTotalPageSize(products.totalProducts, pageSize)}");
 
-                Console.WriteLine("\nPress > to go to next page\nPress < to go to previous page\nPress 'Q' to exit");
-                viewExit = Console.ReadLine();
+               Console.WriteLine("\nPress > to go to next page\nPress < to go to previous page\nPress 'Q' to exit");
+               ConsoleKeyInfo keyInfo = Console.ReadKey(intercept: true);
 
-                if (!viewExit.ToLower().Equals("q")) {
+                if (keyInfo.Key == ConsoleKey.RightArrow) {
+                    Console.Clear();
 
+                    if (pageNumber + 1 <= CalculateTotalPageSize(products.totalProducts, pageSize)) {
+                        pageNumber++;
+                    }
                 }
-                else {
-                    viewExit = "exit";
+                else if(keyInfo.Key == ConsoleKey.LeftArrow) {
+                    Console.Clear();
+                    if (pageNumber - 1 >= 1) {
+                        pageNumber--;
+                    }
+                }
+                else if (keyInfo.Key == ConsoleKey.Q) {
+                    Console.Clear();
+                    break;
                 }
             }
             while (viewExit != null && !viewExit.Equals("exit"));
@@ -114,4 +128,18 @@ do {
 }
 while (!response.Equals("exit"));
 
+Console.Clear();
+Console.WriteLine("Successfully logged out");
 
+void DisplayProducts(List<Product> products) {
+    Console.WriteLine($"{"ID".PadRight(5)} {"Product".PadRight(25)} {"Price"}\n");
+    products.ForEach(product => {
+
+        Console.WriteLine($"{product.Id.ToString().PadRight(5)} {product.Name.PadRight(25)} - {product.Price.ToString("C", CultureInfo.GetCultureInfo("en-PH")).PadLeft(0)}");
+    });
+}
+
+int CalculateTotalPageSize(int totalProducts, int pageSize) {
+
+    return (totalProducts / pageSize) + 1;
+}
