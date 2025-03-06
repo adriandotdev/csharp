@@ -7,4 +7,7 @@ public class Product {
 
     [Column(TypeName = "decimal(6, 2)")]
     public decimal Price {get; set;}
+
+    public int CategoryId { get; set; }  
+    public Category Category {get; set;} = null!;
 }
