@@ -31,4 +31,18 @@ public class ProductRepository : BaseRepository, IProductRepository
             totalProducts
         };
     }
+
+    public bool DeleteProductById(int id)
+    {
+        var productToDelete = productManagementContext.Products.FirstOrDefault(product => product.Id == id);
+
+        if (productToDelete != null) {
+            this.productManagementContext.Products.Remove(productToDelete);
+            this.productManagementContext.SaveChanges();
+
+            return true;
+        }
+
+        return false;
+    }
 }

@@ -98,7 +98,15 @@ do {
             Console.Write("\nEnter the ID of the product you want to delete: ");
             int.TryParse(Console.ReadLine(), out int productId);
 
-            
+            var productIsDeleted = productRepository.DeleteProductById(productId);
+
+            if (productIsDeleted) {
+                Console.WriteLine($"\nProduct with ID of {productId} successfully deleted!");
+            }
+            else {
+                Console.WriteLine($"Product with ID of {productId} is not found.");
+            }
+            Thread.Sleep(1000);
             break;
         case 5:
             response = "exit";
