@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+﻿using Utils;
 
 using ProductManagementContext context = new ProductManagementContext();
 
@@ -6,7 +6,7 @@ ProductRepository productRepository = new();
 
 Console.Clear();
 
-string title = "================Welcome to Yan-Yan Store================";
+string title = "================Welcome to PMS================";
 
 Console.WriteLine(title);
 
@@ -18,7 +18,7 @@ while (loggedInUser == null) {
     string? username = Console.ReadLine();
 
     Console.Write("Password: ");
-    string? password = Console.ReadLine();
+    string? password = ReadPassword();
 
     var user = context.Users.Where(user => user.Username == username).ToArray();
 
@@ -26,7 +26,7 @@ while (loggedInUser == null) {
         Console.WriteLine("Invalid credentials");
         continue;
     } else if (user[0].Password != password) {
-        Console.WriteLine("Invalid credentials");
+        Console.WriteLine("\nInvalid credentials");
         continue;
     }
 
@@ -46,7 +46,7 @@ Console.Clear();
 
 do {
     Console.Clear();
-    Console.WriteLine("\nDashboard\n1.) New Product\n2.) View Products\n3.) Logout\n");
+    Console.WriteLine("\nDashboard\n1.) New Product\n2.) View Products\n3.) Update Product\n4.) Remove Product\n5.) Logout\n");
     Console.Write("Choose: ");
     int.TryParse(Console.ReadLine(), out int choice);
 
@@ -86,60 +86,103 @@ do {
         case 2:
             Console.Clear();
 
-            string? viewExit = "";
-            int pageNumber = 1;
-            int pageSize = 10;
-
-            do {
-                Console.WriteLine("\nProducts\n");
-                var products = productRepository.GetProducts(pageNumber, pageSize);
-           
-                DisplayProducts(products.products);
-
-                Console.WriteLine($"Page {pageNumber} of {CalculateTotalPageSize(products.totalProducts, pageSize)}");
-
-               Console.WriteLine("\nPress > to go to next page\nPress < to go to previous page\nPress 'Q' to exit");
-               ConsoleKeyInfo keyInfo = Console.ReadKey(intercept: true);
-
-                if (keyInfo.Key == ConsoleKey.RightArrow) {
-                    Console.Clear();
-
-                    if (pageNumber + 1 <= CalculateTotalPageSize(products.totalProducts, pageSize)) {
-                        pageNumber++;
-                    }
-                }
-                else if(keyInfo.Key == ConsoleKey.LeftArrow) {
-                    Console.Clear();
-                    if (pageNumber - 1 >= 1) {
-                        pageNumber--;
-                    }
-                }
-                else if (keyInfo.Key == ConsoleKey.Q) {
-                    Console.Clear();
-                    break;
-                }
-            }
-            while (viewExit != null && !viewExit.Equals("exit"));
+            ShowProducts(Context.VIEWING);
             break;
-        default:
+        case 3:
+            Console.WriteLine("Update");
+            break;
+        case 4:
+            Console.Clear();
+            ShowProducts(Context.DELETING);
+
+            Console.Write("\nEnter the ID of the product you want to delete: ");
+            int.TryParse(Console.ReadLine(), out int productId);
+
+            
+            break;
+        case 5:
             response = "exit";
             break;
+        default:
+            continue;
     }
 }
 while (!response.Equals("exit"));
 
 Console.Clear();
-Console.WriteLine("Successfully logged out");
+Console.WriteLine("Successfully logged out!");
 
-void DisplayProducts(List<Product> products) {
-    Console.WriteLine($"{"ID".PadRight(5)} {"Product".PadRight(25)} {"Price"}\n");
-    products.ForEach(product => {
+string ReadPassword() {
 
-        Console.WriteLine($"{product.Id.ToString().PadRight(5)} {product.Name.PadRight(25)} - {product.Price.ToString("C", CultureInfo.GetCultureInfo("en-PH")).PadLeft(0)}");
-    });
+    string password = "";
+    ConsoleKeyInfo key;
+
+    do
+    {
+        key = Console.ReadKey(true); 
+
+        if (key.Key == ConsoleKey.Enter)
+            break;
+
+        if (key.Key == ConsoleKey.Backspace)
+        {
+            if (password.Length > 0)
+            {
+                password = password[..^1];
+                Console.Write("\b \b"); 
+            }
+        }
+        else
+        {
+            password += key.KeyChar;
+            Console.Write("*"); 
+        }
+    } while (true);
+
+    return password;
 }
 
-int CalculateTotalPageSize(int totalProducts, int pageSize) {
 
-    return (totalProducts / pageSize) + 1;
+void ShowProducts(Context ctx) {
+
+    string? viewExit = "";
+    int pageNumber = 1;
+    int pageSize = 10;
+
+    do {
+        Console.WriteLine("\nProducts\n");
+        var products = productRepository.GetProducts(pageNumber, pageSize);
+    
+        Helper.DisplayProducts(products.products);
+
+        Console.WriteLine($"Page {pageNumber} of {Helper.CalculateTotalPageSize(products.totalProducts, pageSize)}");
+
+        if (ctx == Context.DELETING)
+            Console.WriteLine("\nPlease view the product you want to delete\nPress > to go to next page\nPress < to go to previous page\nPress 'Q' to enter the product ID");
+        else
+            Console.WriteLine("\nPress > to go to next page\nPress < to go to previous page\nPress 'Q' to exit");
+        ConsoleKeyInfo keyInfo = Console.ReadKey(intercept: true);
+
+        if (keyInfo.Key == ConsoleKey.RightArrow) {
+            Console.Clear();
+
+            if (pageNumber + 1 <= Helper.CalculateTotalPageSize(products.totalProducts, pageSize)) {
+                pageNumber++;
+            }
+        }
+        else if(keyInfo.Key == ConsoleKey.LeftArrow) {
+            Console.Clear();
+            if (pageNumber - 1 >= 1) {
+                pageNumber--;
+            }
+        }
+        else if (keyInfo.Key == ConsoleKey.Q) {
+
+            if (ctx != Context.DELETING)
+                Console.Clear();
+            break;
+        }
+    }
+    while (viewExit != null && !viewExit.Equals("exit"));
 }
+
