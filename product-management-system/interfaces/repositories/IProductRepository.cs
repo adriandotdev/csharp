@@ -6,4 +6,6 @@ public interface IProductRepository {
     public dynamic GetProducts(int pageNumber = 1, int pageSize = 10);
 
     public bool DeleteProductById(int id);
+
+    public List<Product> GetProducts(string productName);
 }

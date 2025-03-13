@@ -4,7 +4,8 @@ namespace Utils {
 
     enum Context {
         DELETING,
-        VIEWING
+        VIEWING,
+        UPDATING
     }
     
     public class Helper

@@ -45,4 +45,16 @@ public class ProductRepository : BaseRepository, IProductRepository
 
         return false;
     }
+
+    public List<Product> GetProducts(string productName) {
+
+        var products = productManagementContext
+            .Products
+            .Select(p => new Product() {Name = p.Name, Id = p.Id, Price = p.Price})
+            .Where(p => p.Name.ToLower().Contains(productName))
+            .OrderBy(p => p.Id)
+            .ToList();
+
+        return products;
+    }
 }

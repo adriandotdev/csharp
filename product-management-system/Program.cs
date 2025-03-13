@@ -12,41 +12,41 @@ Console.WriteLine(title);
 
 User? loggedInUser = null;
 
-while (loggedInUser == null) {
+// while (loggedInUser == null) {
 
-    Console.Write("\nUsername: ");
-    string? username = Console.ReadLine();
+//     Console.Write("\nUsername: ");
+//     string? username = Console.ReadLine();
 
-    Console.Write("Password: ");
-    string? password = ReadPassword();
+//     Console.Write("Password: ");
+//     string? password = ReadPassword();
 
-    var user = context.Users.Where(user => user.Username == username).ToArray();
+//     var user = context.Users.Where(user => user.Username == username).ToArray();
 
-    if (user == null || user.Length == 0) {
-        Console.WriteLine("Invalid credentials");
-        continue;
-    } else if (user[0].Password != password) {
-        Console.WriteLine("\nInvalid credentials");
-        continue;
-    }
+//     if (user == null || user.Length == 0) {
+//         Console.WriteLine("Invalid credentials");
+//         continue;
+//     } else if (user[0].Password != password) {
+//         Console.WriteLine("\nInvalid credentials");
+//         continue;
+//     }
 
-    loggedInUser = user[0];
+//     loggedInUser = user[0];
 
 
-    Console.WriteLine("\nSuccessfully logged in!");
-}
+//     Console.WriteLine("\nSuccessfully logged in!");
+// }
 
 string response = "";
 
-Thread.Sleep(1000);
-Console.Clear();
-Console.WriteLine("Please wait...");
-Thread.Sleep(1000);
-Console.Clear();
+// Thread.Sleep(1000);
+// Console.Clear();
+// Console.WriteLine("Please wait...");
+// Thread.Sleep(1000);
+// Console.Clear();
 
 do {
     Console.Clear();
-    Console.WriteLine("\nDashboard\n1.) New Product\n2.) View Products\n3.) Update Product\n4.) Remove Product\n5.) Logout\n");
+    Console.WriteLine("\nDashboard\n1.) New Product\n2.) View Products\n3.) Update Product\n4.) Remove Product\n5. Search Product\n6.) Logout\n");
     Console.Write("Choose: ");
     int.TryParse(Console.ReadLine(), out int choice);
 
@@ -89,9 +89,17 @@ do {
             ShowProducts(Context.VIEWING);
             break;
         case 3:
-            Console.WriteLine("Update");
+            Console.Clear();
+
+            ShowProducts(Context.UPDATING);
+
+            Console.Write("\nEnter the ID of the product you want to update: ");
+            int.TryParse(Console.ReadLine(), out int productToUpdateID);
+
+            Console.WriteLine("\nUpdating");
+
             break;
-        case 4:
+        case 4: // Delete
             Console.Clear();
             ShowProducts(Context.DELETING);
 
@@ -108,7 +116,47 @@ do {
             }
             Thread.Sleep(1000);
             break;
-        case 5:
+        case 5: // Search
+            string? viewExit = "";
+            string? searchValue = "";
+            
+            Console.Clear();
+            Console.WriteLine("Search: ");
+            Helper.DisplayProducts(productRepository.GetProducts(searchValue));
+            Console.WriteLine("\nPress (Esc) to exit");
+
+            do {
+               
+                if (Console.KeyAvailable) {
+
+                    Console.Clear();
+                    Console.Write("Search: ");
+
+                    var key = Console.ReadKey(true);
+                    if (key.Key == ConsoleKey.Backspace && searchValue.Length > 0)
+                    {
+                        searchValue = searchValue[..^1]; 
+                        Console.Write(searchValue);
+                    }
+                    else if (!char.IsControl(key.KeyChar)) {
+                        searchValue += key.KeyChar;
+                        Console.Write(searchValue);
+                    }   
+                    else if (key.Key == ConsoleKey.Escape) {
+                        break;
+                    }
+                    var filteredProducts  = productRepository.GetProducts(searchValue);
+                    Console.WriteLine();
+                    if (searchValue.Length > 0 && filteredProducts.Count == 0)  
+                        Console.Write("\n====== No products found ======");
+                    else 
+                        Helper.DisplayProducts(filteredProducts);
+                    Console.WriteLine("\nPress (Esc) to exit");
+                }
+            }
+            while(viewExit != null && !viewExit.Equals("exit"));
+            break;
+        case 6:
             response = "exit";
             break;
         default:
@@ -166,7 +214,9 @@ void ShowProducts(Context ctx) {
         Console.WriteLine($"Page {pageNumber} of {Helper.CalculateTotalPageSize(products.totalProducts, pageSize)}");
 
         if (ctx == Context.DELETING)
-            Console.WriteLine("\nPlease view the product you want to delete\nPress > to go to next page\nPress < to go to previous page\nPress 'Q' to enter the product ID");
+            Console.WriteLine($"\nPlease view the product you want to delete\nPress > to go to next page\nPress < to go to previous page\nPress 'Q' to enter the product ID");
+        else if (ctx == Context.UPDATING) 
+             Console.WriteLine($"\nPlease view the product you want to update\nPress > to go to next page\nPress < to go to previous page\nPress 'Q' to enter the product ID");
         else
             Console.WriteLine("\nPress > to go to next page\nPress < to go to previous page\nPress 'Q' to exit");
         ConsoleKeyInfo keyInfo = Console.ReadKey(intercept: true);
