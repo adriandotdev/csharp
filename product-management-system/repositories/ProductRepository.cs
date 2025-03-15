@@ -46,12 +46,22 @@ public class ProductRepository : BaseRepository, IProductRepository
         return false;
     }
 
+    public Product GetProductById(int id) {
+
+        return this.productManagementContext.Products.First(p => p.Id == id);
+    }
+
     public List<Product> GetProducts(string productName) {
 
         var products = productManagementContext
             .Products
-            .Select(p => new Product() {Name = p.Name, Id = p.Id, Price = p.Price})
-            .Where(p => p.Name.ToLower().Contains(productName))
+            .Select(p => new Product() {
+                Name = p.Name, 
+                Id = p.Id, 
+                Price = p.Price, 
+                CreatedAt = p.CreatedAt
+            })
+            .Where(p => p.Name.ToLower().Contains(productName.ToLower()))
             .OrderBy(p => p.Id)
             .ToList();
 

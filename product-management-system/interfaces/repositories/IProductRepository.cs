@@ -8,4 +8,6 @@ public interface IProductRepository {
     public bool DeleteProductById(int id);
 
     public List<Product> GetProducts(string productName);
+
+    public Product GetProductById(int id);
 }
