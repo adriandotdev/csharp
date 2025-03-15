@@ -10,122 +10,140 @@ string title = "================ Welcome to PMS ================";
 
 User? loggedInUser = null;
 
-Login();
-DisplayLoadingIndicator();
+while (true) {
+    Login();
+    DisplayLoadingIndicator();
 
-string response = "";
+    string response = "";
 
-do {
-    Console.Clear();
-    DisplayDashboard();
-    Console.Write("Choose: ");
-    int.TryParse(Console.ReadLine(), out int choice);
+    do {
+        Console.Clear();
+        DisplayDashboard(loggedInUser!.Role);
 
-    switch(choice) {
 
-        case 1: 
-            Console.Clear();
-            CreateProduct();
-            break;
-        case 2:
-            Console.Clear();
+        Console.Write("Choose: ");
+        ConsoleKeyInfo keyInfo = Console.ReadKey(intercept: true);
 
-            ShowProducts(Context.VIEWING);
-            break;
-        case 3:
-            Console.Clear();
+        
+        switch(keyInfo.Key) {
 
-            ShowProducts(Context.UPDATING);
+            case ConsoleKey.D1: 
+                if (!IsAllowedRole(["admin"], loggedInUser.Role)) break;
 
-            Console.Write("\nEnter the ID of the product you want to update: ");
-            bool isValidProductId = int.TryParse(Console.ReadLine(), out int productToUpdateID);
+                Console.Clear();
+                CreateProduct();
+                break;
+            case ConsoleKey.D2:
+                if (!IsAllowedRole(["admin", "user"], loggedInUser.Role)) break;
 
-            if (!isValidProductId) continue;
+                Console.Clear();
+                ShowProducts(Context.VIEWING);
+                break;
+            case ConsoleKey.D3:
+                if (!IsAllowedRole(["admin"], loggedInUser.Role)) break;
 
-            Console.Write("\nEnter new name: (Leave blank to keep current): ");
-            string? newProductName = Console.ReadLine();
+                Console.Clear();
 
-            Console.Write("\nEnter new price: (Leave blank to keep current): ");
-            int.TryParse(Console.ReadLine(), out int newProductPrice);
+                ShowProducts(Context.UPDATING);
 
-            var productToUpdate = productRepository.GetProductById(productToUpdateID);
+                Console.Write("\nEnter the ID of the product you want to update: ");
+                bool isValidProductId = int.TryParse(Console.ReadLine(), out int productToUpdateID);
 
-            productToUpdate.Name = newProductName?.Length > 0 ? newProductName : productToUpdate.Name;
+                if (!isValidProductId) continue;
 
-            productToUpdate.Price = newProductPrice > 0 ? newProductPrice : productToUpdate.Price;
+                Console.Write("\nEnter new name: (Leave blank to keep current): ");
+                string? newProductName = Console.ReadLine();
 
-            context.SaveChanges();
+                Console.Write("\nEnter new price: (Leave blank to keep current): ");
+                int.TryParse(Console.ReadLine(), out int newProductPrice);
 
-            Console.WriteLine($"\nProduct {productToUpdate.Name} successfully updated!");
-            Thread.Sleep(1500);
-            break;
-        case 4: 
-            Console.Clear();
-            ShowProducts(Context.DELETING);
+                var productToUpdate = productRepository.GetProductById(productToUpdateID);
 
-            Console.Write("\nEnter the ID of the product you want to delete (Leave blank if you want to cancel): ");
-            int.TryParse(Console.ReadLine(), out int productId);
+                productToUpdate.Name = newProductName?.Length > 0 ? newProductName : productToUpdate.Name;
 
-            var productIsDeleted = productRepository.DeleteProductById(productId);
+                productToUpdate.Price = newProductPrice > 0 ? newProductPrice : productToUpdate.Price;
 
-            if (productIsDeleted) {
-                Console.WriteLine($"\nProduct with ID of {productId} successfully deleted!");
-            }
-            else {
-                Console.WriteLine($"Product with ID of {productId} is not found.");
-            }
-            Thread.Sleep(1000);
-            break;
-        case 5: // Search
-            string? viewExit = "";
-            string? searchValue = "";
-            
-            Console.Clear();
-            Console.WriteLine("Search: ");
-            Helper.DisplayProducts(productRepository.GetProducts(searchValue));
-            Console.WriteLine("\nPress (Esc) to exit");
+                context.SaveChanges();
 
-            do {
-               
-                if (Console.KeyAvailable) {
+                Console.WriteLine($"\nProduct {productToUpdate.Name} successfully updated!");
+                Thread.Sleep(1500);
+                break;
+            case ConsoleKey.D4: 
+                if (!IsAllowedRole(["admin"], loggedInUser.Role)) break;
 
-                    Console.Clear();
-                    Console.Write("Search: ");
+                Console.Clear();
+                ShowProducts(Context.DELETING);
 
-                    var key = Console.ReadKey(true);
-                    if (key.Key == ConsoleKey.Backspace && searchValue.Length > 0) {
-                        searchValue = searchValue[..^1]; 
-                        Console.Write(searchValue);
-                    }
-                    else if (!char.IsControl(key.KeyChar)) {
-                        searchValue += key.KeyChar;
-                        Console.Write(searchValue);
-                    }   
-                    else if (key.Key == ConsoleKey.Escape) {
-                        break;
-                    }
-                    var filteredProducts  = productRepository.GetProducts(searchValue);
-                    Console.WriteLine();
-                    if (searchValue.Length > 0 && filteredProducts.Count == 0)  
-                        Console.Write("\n====== No products found ======");
-                    else 
-                        Helper.DisplayProducts(filteredProducts);
-                    Console.WriteLine("\nPress (Esc) to exit");
+                Console.Write("\nEnter the ID of the product you want to delete (Leave blank if you want to cancel): ");
+                int.TryParse(Console.ReadLine(), out int productId);
+
+                var productIsDeleted = productRepository.DeleteProductById(productId);
+
+                if (productIsDeleted) {
+                    Console.WriteLine($"\nProduct with ID of {productId} successfully deleted!");
                 }
-            }
-            while(viewExit != null && !viewExit.Equals("exit"));
-            break;
-        case 6:
-            response = "exit";
-            break;
-        default:
-            continue;
-    }
-}
-while (!response.Equals("exit"));
+                else {
+                    Console.WriteLine($"Product with ID of {productId} is not found.");
+                }
+                Thread.Sleep(1000);
+                break;
+            case ConsoleKey.D5: // Search
+                if (!IsAllowedRole(["admin", "user"], loggedInUser.Role)) break;
 
-Console.Clear();
-Console.WriteLine("Successfully logged out!");
+                string? viewExit = "";
+                string? searchValue = "";
+                
+                Console.Clear();
+                Console.WriteLine("Search: ");
+                Helper.DisplayProducts(productRepository.GetProducts(searchValue));
+                Console.WriteLine("\nPress (Esc) to exit");
+
+                do {
+                
+                    if (Console.KeyAvailable) {
+
+                        Console.Clear();
+                        Console.Write("Search: ");
+
+                        var key = Console.ReadKey(true);
+                        if (key.Key == ConsoleKey.Backspace && searchValue.Length > 0) {
+                            searchValue = searchValue[..^1]; 
+                            Console.Write(searchValue);
+                        }
+                        else if (!char.IsControl(key.KeyChar)) {
+                            searchValue += key.KeyChar;
+                            Console.Write(searchValue);
+                        }   
+                        else if (key.Key == ConsoleKey.Escape) {
+                            break;
+                        }
+                        var filteredProducts  = productRepository.GetProducts(searchValue);
+                        Console.WriteLine();
+                        if (searchValue.Length > 0 && filteredProducts.Count == 0)  
+                            Console.Write("\n====== No products found ======");
+                        else 
+                            Helper.DisplayProducts(filteredProducts);
+                        Console.WriteLine("\n\nPress (Esc) to exit");
+                    }
+                }
+                while(viewExit != null && !viewExit.Equals("exit"));
+                break;
+            case ConsoleKey.D6:
+                loggedInUser = null;
+                response = "logout";
+                break;
+            default:
+                continue;
+        }
+    }
+    while (!response.Equals("logout"));
+
+    Console.Clear();
+    Console.WriteLine("Successfully logged out!");
+    Thread.Sleep(1000);
+    Console.Clear();
+}
+
 
 string ReadPassword() {
 
@@ -286,6 +304,16 @@ void Login() {
     }
 }
 
-void DisplayDashboard() {
-    Console.WriteLine("\n======== PMS Dashboard ========\n1.) New Product\n2.) View Products\n3.) Update Product\n4.) Remove Product\n5. Search Product\n6.) Logout\n");
+void DisplayDashboard(string role) {
+
+    if (role.ToLower() == "admin")
+        Console.WriteLine("\n======== PMS Dashboard ========\n1.) New Product\n2.) View Products\n3.) Update Product\n4.) Remove Product\n5. Search Product\n6.) Logout\n");
+
+    else 
+        Console.WriteLine("\n======== PMS Dashboard ========\n2.) View Products\n5. Search Product\n6.) Logout\n");
+}
+
+bool IsAllowedRole(string[] allowedRoles, string role) {
+
+    return allowedRoles.Contains(role);
 }
