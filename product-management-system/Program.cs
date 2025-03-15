@@ -2,6 +2,7 @@
 
 using ProductManagementContext context = new();
 ProductRepository productRepository = new();
+UserRepository userRepository = new();
 
 Console.Clear();
 
@@ -18,22 +19,22 @@ while (loggedInUser == null) {
     Console.Write("Password: ");
     string? password = ReadPassword();
 
-    var user = context.Users.Where(user => user.Username == username).ToArray();
+    var user = userRepository.GetUserByUsername(username);
 
-    if (user == null || user.Length == 0) {
+    if (user == null) {
        
         Console.WriteLine("\nInvalid credentials");
         Thread.Sleep(1000);
         Console.Clear();
         continue;
-    } else if (user[0].Password != password) {
+    } else if (user.Password != password) {
         Console.WriteLine("\nInvalid credentials");
         Thread.Sleep(1000);
         Console.Clear();
         continue;
     }
 
-    loggedInUser = user[0];
+    loggedInUser = user;
 
 
     Console.WriteLine("\nSuccessfully logged in!");
@@ -43,7 +44,20 @@ string response = "";
 
 Thread.Sleep(1000);
 Console.Clear();
-Console.WriteLine("Please wait...");
+
+string[] chars = {".", ".", "."};
+string message = "Please wait";
+
+for (int i = 0; i < 3; i++) {
+    message = "Please wait";
+
+    foreach(string s in chars) {
+        message +=  s;
+        Console.Write($"\r{message.PadRight(Console.WindowWidth)}");
+        Thread.Sleep(200);
+    }
+}
+
 Thread.Sleep(1000);
 Console.Clear();
 
