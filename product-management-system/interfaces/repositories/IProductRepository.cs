@@ -4,4 +4,10 @@ public interface IProductRepository {
     public List<Category> GetCategories();
 
     public dynamic GetProducts(int pageNumber = 1, int pageSize = 10);
+
+    public bool DeleteProductById(int id);
+
+    public List<Product> GetProducts(string productName);
+
+    public Product GetProductById(int id);
 }
