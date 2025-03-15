@@ -12,37 +12,37 @@ Console.WriteLine(title);
 
 User? loggedInUser = null;
 
-// while (loggedInUser == null) {
+while (loggedInUser == null) {
 
-//     Console.Write("\nUsername: ");
-//     string? username = Console.ReadLine();
+    Console.Write("\nUsername: ");
+    string? username = Console.ReadLine();
 
-//     Console.Write("Password: ");
-//     string? password = ReadPassword();
+    Console.Write("Password: ");
+    string? password = ReadPassword();
 
-//     var user = context.Users.Where(user => user.Username == username).ToArray();
+    var user = context.Users.Where(user => user.Username == username).ToArray();
 
-//     if (user == null || user.Length == 0) {
-//         Console.WriteLine("Invalid credentials");
-//         continue;
-//     } else if (user[0].Password != password) {
-//         Console.WriteLine("\nInvalid credentials");
-//         continue;
-//     }
+    if (user == null || user.Length == 0) {
+        Console.WriteLine("Invalid credentials");
+        continue;
+    } else if (user[0].Password != password) {
+        Console.WriteLine("\nInvalid credentials");
+        continue;
+    }
 
-//     loggedInUser = user[0];
+    loggedInUser = user[0];
 
 
-//     Console.WriteLine("\nSuccessfully logged in!");
-// }
+    Console.WriteLine("\nSuccessfully logged in!");
+}
 
 string response = "";
 
-// Thread.Sleep(1000);
-// Console.Clear();
-// Console.WriteLine("Please wait...");
-// Thread.Sleep(1000);
-// Console.Clear();
+Thread.Sleep(1000);
+Console.Clear();
+Console.WriteLine("Please wait...");
+Thread.Sleep(1000);
+Console.Clear();
 
 do {
     Console.Clear();
