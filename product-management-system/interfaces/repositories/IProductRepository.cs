@@ -7,5 +7,7 @@ public interface IProductRepository {
 
     public bool DeleteProductById(int id);
 
+     public Product GetProductById(int id);
+     
     public List<Product> GetProducts(string productName);
 }

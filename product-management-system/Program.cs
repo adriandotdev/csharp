@@ -7,7 +7,7 @@ UserRepository userRepository = new();
 // Use Cases
 CreateProductUseCase createProduct = new (productRepository, context);
 ShowproductsUseCase showproducts = new (productRepository, context);
-
+UpdateProductUseCase updateProduct = new(productRepository, showproducts, context);
 Console.Clear();
 
 string title = "================ Welcome to PMS ================";
@@ -42,32 +42,9 @@ while (true) {
                 break;
             case ConsoleKey.D3:
                 if (!Helper.IsAllowedRole(["admin"], loggedInUser.Role)) break;
+                
+                updateProduct.Run();
 
-                Console.Clear();
-
-                ShowProducts(Context.UPDATING);
-
-                Console.Write("\nEnter the ID of the product you want to update: ");
-                bool isValidProductId = int.TryParse(Console.ReadLine(), out int productToUpdateID);
-
-                if (!isValidProductId) continue;
-
-                Console.Write("\nEnter new name: (Leave blank to keep current): ");
-                string? newProductName = Console.ReadLine();
-
-                Console.Write("\nEnter new price: (Leave blank to keep current): ");
-                int.TryParse(Console.ReadLine(), out int newProductPrice);
-
-                var productToUpdate = productRepository.GetProductById(productToUpdateID);
-
-                productToUpdate.Name = newProductName?.Length > 0 ? newProductName : productToUpdate.Name;
-
-                productToUpdate.Price = newProductPrice > 0 ? newProductPrice : productToUpdate.Price;
-
-                context.SaveChanges();
-
-                Console.WriteLine($"\nProduct {productToUpdate.Name} successfully updated!");
-                Thread.Sleep(1500);
                 break;
             case ConsoleKey.D4: 
                 if (!Helper.IsAllowedRole(["admin"], loggedInUser.Role)) break;
@@ -84,7 +61,7 @@ while (true) {
                     Console.WriteLine($"\nProduct with ID of {productId} successfully deleted!");
                 }
                 else {
-                    Console.WriteLine($"Product with ID of {productId} is not found.");
+                    Console.WriteLine($"Product not found.");
                 }
                 Thread.Sleep(1000);
                 break;
