@@ -4,6 +4,10 @@ ProductManagementContext context = new();
 ProductRepository productRepository = new();
 UserRepository userRepository = new();
 
+// Use Cases
+CreateProductUseCase createProduct = new (productRepository, context);
+ShowproductsUseCase showproducts = new (productRepository, context);
+
 Console.Clear();
 
 string title = "================ Welcome to PMS ================";
@@ -12,7 +16,7 @@ User? loggedInUser = null;
 
 while (true) {
     Login();
-    DisplayLoadingIndicator();
+    // DisplayLoadingIndicator();
 
     string response = "";
 
@@ -20,27 +24,24 @@ while (true) {
         Console.Clear();
         DisplayDashboard(loggedInUser!.Role);
 
-
         Console.Write("Choose: ");
         ConsoleKeyInfo keyInfo = Console.ReadKey(intercept: true);
 
-        
         switch(keyInfo.Key) {
 
             case ConsoleKey.D1: 
-                if (!IsAllowedRole(["admin"], loggedInUser.Role)) break;
-
+             
                 Console.Clear();
-                CreateProduct();
+                createProduct.Run();
                 break;
             case ConsoleKey.D2:
-                if (!IsAllowedRole(["admin", "user"], loggedInUser.Role)) break;
+                if (!Helper.IsAllowedRole(["admin", "user"], loggedInUser.Role)) break;
 
                 Console.Clear();
-                ShowProducts(Context.VIEWING);
+                showproducts.Run(Context.VIEWING);
                 break;
             case ConsoleKey.D3:
-                if (!IsAllowedRole(["admin"], loggedInUser.Role)) break;
+                if (!Helper.IsAllowedRole(["admin"], loggedInUser.Role)) break;
 
                 Console.Clear();
 
@@ -69,7 +70,7 @@ while (true) {
                 Thread.Sleep(1500);
                 break;
             case ConsoleKey.D4: 
-                if (!IsAllowedRole(["admin"], loggedInUser.Role)) break;
+                if (!Helper.IsAllowedRole(["admin"], loggedInUser.Role)) break;
 
                 Console.Clear();
                 ShowProducts(Context.DELETING);
@@ -88,7 +89,7 @@ while (true) {
                 Thread.Sleep(1000);
                 break;
             case ConsoleKey.D5: // Search
-                if (!IsAllowedRole(["admin", "user"], loggedInUser.Role)) break;
+                if (!Helper.IsAllowedRole(["admin", "user"], loggedInUser.Role)) break;
 
                 string? viewExit = "";
                 string? searchValue = "";
@@ -129,6 +130,11 @@ while (true) {
                 while(viewExit != null && !viewExit.Equals("exit"));
                 break;
             case ConsoleKey.D6:
+                 if (!Helper.IsAllowedRole(["admin"], loggedInUser.Role)) break;
+
+                CreateUser();
+                break;
+            case ConsoleKey.D7:
                 loggedInUser = null;
                 response = "logout";
                 break;
@@ -307,13 +313,46 @@ void Login() {
 void DisplayDashboard(string role) {
 
     if (role.ToLower() == "admin")
-        Console.WriteLine("\n======== PMS Dashboard ========\n1.) New Product\n2.) View Products\n3.) Update Product\n4.) Remove Product\n5. Search Product\n6.) Logout\n");
+        Console.WriteLine("\n======== PMS Dashboard ========\n1.) New Product\n2.) View Products\n3.) Update Product\n4.) Remove Product\n5.) Search Product\n6.) New User\n7.) Logout\n");
 
     else 
-        Console.WriteLine("\n======== PMS Dashboard ========\n2.) View Products\n5. Search Product\n6.) Logout\n");
+        Console.WriteLine("\n======== PMS Dashboard ========\n2.) View Products\n5. Search Product\n7.) Logout\n");
 }
 
-bool IsAllowedRole(string[] allowedRoles, string role) {
 
-    return allowedRoles.Contains(role);
+
+void CreateUser() {
+
+    Console.Clear(); 
+    Console.Write("\nPleas provide a name: ");
+    string? name = Console.ReadLine();
+
+    Console.Write("\nPleas provide a username: ");
+    string? username = Console.ReadLine();
+
+    string? password = "password";
+
+    Console.Write("\nRoles: \n1.) Admin\n2.) User\nEnter the role of the new user: ");
+    string? role = "";
+
+    ConsoleKeyInfo keyInfo = Console.ReadKey(intercept: true);
+
+    if (keyInfo.Key == ConsoleKey.D1)
+        role = "admin";
+    else if (keyInfo.Key == ConsoleKey.D2)
+        role = "user";
+
+    if (name?.Length > 0 && username?.Length > 0 && role.Length > 0) {
+
+        userRepository.CreateUser(new User() {
+            Name = name,
+            Username = username,
+            Password = password,
+            Role = role
+        });
+        Console.Clear();
+        Console.WriteLine("User successfully created!");
+        Thread.Sleep(1000);
+        Console.Clear();
+    }
 }

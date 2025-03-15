@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace Utils {
 
-    enum Context {
+    public enum Context {
         DELETING,
         VIEWING,
         UPDATING
@@ -26,5 +26,11 @@ namespace Utils {
 
             return (totalProducts / pageSize) + 1;
        }
+
+       
+       public static bool IsAllowedRole(string[] allowedRoles, string role) {
+
+            return allowedRoles.Contains(role);
+        }
     }
 }
