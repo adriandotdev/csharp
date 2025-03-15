@@ -1,6 +1,6 @@
 ﻿using Utils;
 
-using ProductManagementContext context = new();
+ProductManagementContext context = new();
 ProductRepository productRepository = new();
 UserRepository userRepository = new();
 
@@ -10,60 +10,14 @@ string title = "================ Welcome to PMS ================";
 
 User? loggedInUser = null;
 
-while (loggedInUser == null) {
-
-    Console.WriteLine(title);
-    Console.Write("\nUsername: ");
-    string? username = Console.ReadLine();
-
-    Console.Write("Password: ");
-    string? password = ReadPassword();
-
-    var user = userRepository.GetUserByUsername(username);
-
-    if (user == null) {
-       
-        Console.WriteLine("\nInvalid credentials");
-        Thread.Sleep(1000);
-        Console.Clear();
-        continue;
-    } else if (user.Password != password) {
-        Console.WriteLine("\nInvalid credentials");
-        Thread.Sleep(1000);
-        Console.Clear();
-        continue;
-    }
-
-    loggedInUser = user;
-
-
-    Console.WriteLine("\nSuccessfully logged in!");
-}
+Login();
+DisplayLoadingIndicator();
 
 string response = "";
 
-Thread.Sleep(1000);
-Console.Clear();
-
-string[] chars = {".", ".", "."};
-string message = "Please wait";
-
-for (int i = 0; i < 3; i++) {
-    message = "Please wait";
-
-    foreach(string s in chars) {
-        message +=  s;
-        Console.Write($"\r{message.PadRight(Console.WindowWidth)}");
-        Thread.Sleep(200);
-    }
-}
-
-Thread.Sleep(1000);
-Console.Clear();
-
 do {
     Console.Clear();
-    Console.WriteLine("\n======== PMS Dashboard ========\n1.) New Product\n2.) View Products\n3.) Update Product\n4.) Remove Product\n5. Search Product\n6.) Logout\n");
+    DisplayDashboard();
     Console.Write("Choose: ");
     int.TryParse(Console.ReadLine(), out int choice);
 
@@ -139,8 +93,7 @@ do {
                     Console.Write("Search: ");
 
                     var key = Console.ReadKey(true);
-                    if (key.Key == ConsoleKey.Backspace && searchValue.Length > 0)
-                    {
+                    if (key.Key == ConsoleKey.Backspace && searchValue.Length > 0) {
                         searchValue = searchValue[..^1]; 
                         Console.Write(searchValue);
                     }
@@ -281,3 +234,58 @@ void ShowProducts(Context ctx) {
     while (viewExit != null && !viewExit.Equals("exit"));
 }
 
+void DisplayLoadingIndicator() {
+    Thread.Sleep(1000);
+    Console.Clear();
+
+    string[] chars = {".", ".", "."};
+    string message = "Please wait";
+
+    for (int i = 0; i < 3; i++) {
+        message = "Please wait";
+
+        foreach(string s in chars) {
+            message +=  s;
+            Console.Write($"\r{message.PadRight(Console.WindowWidth)}");
+            Thread.Sleep(200);
+        }
+    }
+
+    Thread.Sleep(1000);
+    Console.Clear();
+}
+
+void Login() {
+    while (loggedInUser == null) {
+
+        Console.WriteLine(title);
+        Console.Write("\nUsername: ");
+        string? username = Console.ReadLine();
+
+        Console.Write("Password: ");
+        string? password = ReadPassword();
+
+        var user = userRepository.GetUserByUsername(username);
+
+        if (user == null) {
+        
+            Console.WriteLine("\nInvalid credentials");
+            Thread.Sleep(1000);
+            Console.Clear();
+            continue;
+        } else if (user.Password != password) {
+            Console.WriteLine("\nInvalid credentials");
+            Thread.Sleep(1000);
+            Console.Clear();
+            continue;
+        }
+
+        loggedInUser = user;
+
+        Console.WriteLine("\nSuccessfully logged in!");
+    }
+}
+
+void DisplayDashboard() {
+    Console.WriteLine("\n======== PMS Dashboard ========\n1.) New Product\n2.) View Products\n3.) Update Product\n4.) Remove Product\n5. Search Product\n6.) Logout\n");
+}
