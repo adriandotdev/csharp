@@ -23,11 +23,20 @@ public class UserRepository : BaseRepository, IUserRepository
         return result[0];
     }
 
-    public List<User> GetUsers()
+    public dynamic GetUsers(int pageNumber = 1, int pageSize = 10)
     {
-       return this.productManagementContext.Users
-            .Select(u => new User() {Name = u.Name, Username = u.Username, DateCreated = u.DateCreated})
+       var users = this.productManagementContext.Users
+            .Select(u => new User() {Id = u.Id, Name = u.Name, Username = u.Username, DateCreated = u.DateCreated})
             .OrderBy(p => p.Id)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .ToList();
+
+        var totalUsers = this.productManagementContext.Users.Count();
+
+        return new {
+            users,
+            totalUsers
+        };
     }
 }

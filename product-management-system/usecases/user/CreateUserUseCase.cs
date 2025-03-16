@@ -2,6 +2,9 @@ public class CreateUserUseCase(IUserRepository repository) {
 
     public void Run() {
         Console.Clear(); 
+
+        Console.WriteLine("New User");
+
         Console.Write("\nPlease provide a name: ");
         string? name = Console.ReadLine();
 

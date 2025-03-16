@@ -11,6 +11,7 @@ UpdateProductUseCase updateProduct = new(productRepository, showproducts, contex
 DeleteProductUseCase deleeteProduct = new(productRepository, showproducts);
 SearchProductUseCase searchProduct = new(productRepository);
 CreateUserUseCase createUser = new(userRepository);
+GetUsersUseCase getUsers = new(userRepository);
 LoginUseCase login = new(userRepository);
 LogoutUseCase logout = new();
 
@@ -42,7 +43,7 @@ while (true) {
     while (loggedInUser != null);
 
     Console.Clear();
-    Console.WriteLine("Successfully logged out!");
+    Console.WriteLine("Thank you. You have been successfully logged out!");
     Thread.Sleep(1000);
     Console.Clear();
 }
@@ -65,7 +66,8 @@ Dictionary<ConsoleKey, Action> GetDashboardActions(ref User loggedInUser) {
         actions[ConsoleKey.D4] = deleeteProduct.Run;
         actions[ConsoleKey.D5] = searchProduct.Run;
         actions[ConsoleKey.D6] = createUser.Run;
-        actions[ConsoleKey.D7] = PerformLogout;
+        actions[ConsoleKey.D7] = () => {Console.Clear(); getUsers.Run(Context.VIEWING);};
+        actions[ConsoleKey.D8] = PerformLogout;
     }
     else if (loggedInUser.Role == "user") {
         actions[ConsoleKey.D1] = () => {
