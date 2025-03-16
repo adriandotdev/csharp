@@ -12,5 +12,5 @@ public class User {
 
     public string Role { get; set;} = null!;
     
-    public DateTime DateCreated { get; set;} = DateTime.UtcNow;
+    public DateOnly DateCreated { get; set;} = DateOnly.FromDateTime(DateTime.UtcNow);
 }
