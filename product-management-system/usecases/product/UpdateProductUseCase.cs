@@ -16,7 +16,11 @@ public class UpdateProductUseCase(
         Console.Write("\nEnter the ID of the product you want to update: ");
         bool isValidProductId = int.TryParse(Console.ReadLine(), out int productToUpdateID);
 
-        if (!isValidProductId) return;
+        if (!isValidProductId) {
+            Console.WriteLine("Product not found.");
+            Thread.Sleep(1000);
+            return;
+        };
 
         Console.Write("\nEnter new name: (Leave blank to keep current): ");
         string? newProductName = Console.ReadLine();

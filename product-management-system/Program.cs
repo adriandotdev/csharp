@@ -22,7 +22,7 @@ string title = "================ Welcome to PMS ================";
 User? loggedInUser = null;
 
 while (true) {
-    login.Run(ref loggedInUser, title);
+    login.Run(ref loggedInUser!, title);
     Helper.DisplayLoadingIndicator();
 
     do {
@@ -36,7 +36,7 @@ while (true) {
 
         Dictionary<ConsoleKey, Action> dashboardActions = GetDashboardActions(ref loggedInUser);
 
-        if (dashboardActions.TryGetValue(keyInfo.Key, out Action action)) {
+        if (dashboardActions.TryGetValue(keyInfo.Key, out Action? action)) {
             action.Invoke();
         }
     }
