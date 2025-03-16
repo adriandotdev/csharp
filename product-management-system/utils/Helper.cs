@@ -24,6 +24,8 @@ namespace Utils {
 
        public static int CalculateTotalPageSize(int totalProducts, int pageSize) {
 
+            if (totalProducts == pageSize) return 1;
+            
             return (totalProducts / pageSize) + 1;
        }
 
@@ -87,7 +89,7 @@ namespace Utils {
         public static void DisplayDashboard(string role) {
 
             if (role.ToLower() == "admin")
-                Console.WriteLine("\n======== PMS Dashboard ========\n1.) New Product\n2.) View Products\n3.) Update Product\n4.) Remove Product\n5.) Search Product\n6.) New User\n7.) Logout\n");
+                Console.WriteLine("\n======== PMS Dashboard ========\n1.) New Product\n2.) View Products\n3.) Update Product\n4.) Remove Product\n5.) Search Product\n6.) New User\n7.) View Users\n8.) Logout\n");
 
             else 
                 Console.WriteLine("\n======== PMS Dashboard ========\n1.) View Products\n2. Search Product\n3.) Logout\n");
