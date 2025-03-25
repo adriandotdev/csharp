@@ -12,4 +12,6 @@ public class Product {
     public Category Category {get; set;} = null!;
 
     public DateOnly CreatedAt {get; set;} =DateOnly.FromDateTime(DateTime.UtcNow);
+
+    public DateOnly ExpirationDate {get; set;}
 }

@@ -32,7 +32,7 @@ namespace Route {
 
        private static async Task<IResult> GetProducts(ProductDb db, int pageSize = 10, int pageNumber = 1) {
 
-           var products = await db.Products.OrderBy(p => p.Id).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+           var products = await db.Products.Select(product => new Product() {Id = product.Id, Name = product.Name, Price = product.Price, CreatedAt = product.CreatedAt, Category = product.Category}).OrderBy(p => p.Id).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
            var totalProducts = db.Products.Count();
 
            return TypedResults.Ok(new {
