@@ -7,9 +7,9 @@ namespace Route {
         public static void Map(WebApplication app) {
             var products = app.MapGroup("/api/v1/products");
 
-            products.MapGet("/", GetProducts).RequireAuthorization("admin_or_user_auth");
+            products.MapGet("/", GetProducts);
 
-            products.MapPost("/", CreateProduct).RequireAuthorization("admin_auth");
+            products.MapPost("/", CreateProduct);
 
             products.MapDelete("/{id}", DeleteProduct);
 
