@@ -7,16 +7,16 @@ namespace Route {
         public static void Map(WebApplication app) {
             var products = app.MapGroup("/api/v1/products");
 
-            products.MapGet("/", GetProducts);
+            products.MapGet("/", GetProducts).RequireAuthorization("admin_or_user_auth");
 
-            products.MapPost("/", CreateProduct);
+            products.MapPost("/", CreateProduct).RequireAuthorization("admin_auth");
 
-            products.MapDelete("/{id}", DeleteTodo);
+            products.MapDelete("/{id}", DeleteProduct);
 
             products.MapPut("/{id}", UpdateProduct);
         }
 
-        private static async Task<IResult> DeleteTodo(int id, ProductDb db)
+        private static async Task<IResult> DeleteProduct(int id, ProductDb db)
         {
                 var product = await db.Products.FindAsync(id);
 
@@ -32,7 +32,7 @@ namespace Route {
 
        private static async Task<IResult> GetProducts(ProductDb db, int pageSize = 10, int pageNumber = 1) {
 
-           var products = await db.Products.Select(product => new Product() {Id = product.Id, Name = product.Name, Price = product.Price, CreatedAt = product.CreatedAt, Category = product.Category}).OrderBy(p => p.Id).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+           var products = await db.Products.Select(product => new Product() {Id = product.Id, Name = product.Name, Price = product.Price, CreatedAt = product.CreatedAt, Category = product.Category, ExpirationDate = product.ExpirationDate, Description = product.Description}).OrderBy(p => p.Id).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
            var totalProducts = db.Products.Count();
 
            return TypedResults.Ok(new {

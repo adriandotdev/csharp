@@ -13,5 +13,7 @@ public class Product {
 
     public DateOnly CreatedAt {get; set;} =DateOnly.FromDateTime(DateTime.UtcNow);
 
-    public DateOnly ExpirationDate {get; set;}
+    public string? Description {get; set;} 
+    
+    public DateOnly? ExpirationDate {get; set;}
 }
