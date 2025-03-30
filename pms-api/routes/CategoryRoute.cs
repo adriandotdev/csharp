@@ -16,7 +16,14 @@ namespace Route {
         private static async Task<IResult> GetCategories(ProductDb db, int pageSize = 10, int pageNumber = 1) {
 
             var categories = await db.Categories
-                .Select(category => new Category() {Id = category.Id, Name = category.Name, Description = category.Description, CreatedAt = category.CreatedAt })
+                .Select(category => 
+                    new Category() {
+                        Id = category.Id, 
+                        Name = category.Name, 
+                        Description = category.Description, 
+                        CreatedAt = category.CreatedAt, 
+                        Products = category.Products 
+                })
                 .OrderBy(c => c.Id)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
