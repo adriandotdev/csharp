@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Route {
 
@@ -30,24 +31,100 @@ namespace Route {
             return TypedResults.Ok();
         }
 
-       private static async Task<IResult> GetProducts(ProductDb db, int pageSize = 10, int pageNumber = 1) {
+       private static async Task<IResult> GetProducts(ProductDb db, int pageSize = 10, int pageNumber = 1, string sortDirection = "asc", string filter = "") {
+           var totalProducts = await db.Products.CountAsync();
+            var totalFilteredProducts = 0;
 
-           var products = await db.Products.Select(product => new Product() {Id = product.Id, Name = product.Name, Price = product.Price, CreatedAt = product.CreatedAt, Category = product.Category, ExpirationDate = product.ExpirationDate, Description = product.Description}).OrderBy(p => p.Id).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
-           var totalProducts = db.Products.Count();
+            var columnValue = new NpgsqlParameter("columnValue", $"%{filter}%");
+
+            IQueryable<Product> query;
+
+            if (!string.IsNullOrEmpty(filter)) {
+
+                totalFilteredProducts = await db.Products.FromSqlRaw($@"
+                SELECT 
+                    p.""Id"", 
+                    p.""Name"", 
+                    p.""Price"",
+                    p.""CreatedAt"",
+                    p.""CategoryId"",
+                    p.""Description"",
+                    p.""ExpirationDate""
+                FROM 
+                    ""Products"" AS p
+                INNER JOIN ""Categories"" AS c ON c.""Id"" = p.""CategoryId""
+                WHERE p.""Name"" ILIKE @columnValue", columnValue).CountAsync();
+                
+                query = db.Products.FromSqlRaw($@"
+                SELECT 
+                    p.""Id"", 
+                    p.""Name"", 
+                    p.""Price"",
+                    p.""CreatedAt"",
+                    p.""CategoryId"",
+                    p.""Description"",
+                    p.""ExpirationDate""
+                FROM 
+                    ""Products"" AS p
+                INNER JOIN ""Categories"" AS c ON c.""Id"" = p.""CategoryId""
+                WHERE p.""Name"" ILIKE @columnValue", columnValue).Select(product => new Product() {
+                    Id = product.Id, 
+                    Name = product.Name, 
+                    Price = product.Price, 
+                    CreatedAt = product.CreatedAt, 
+                    ExpirationDate = product.ExpirationDate, 
+                    Description = product.Description,
+                    CategoryId = product.CategoryId,
+                    Category = product.Category
+                });
+            }
+            else {
+                query = db.Products
+                    .Select(product => 
+                        new Product() {
+                            Id = product.Id, 
+                            Name = product.Name, 
+                            Price = product.Price, 
+                            CreatedAt = product.CreatedAt, 
+                            ExpirationDate = product.ExpirationDate, 
+                            Description = product.Description,
+                            CategoryId = product.CategoryId,
+                            Category = product.Category
+                });
+            }
+       
+            query = sortDirection == "desc"
+                ? query.OrderByDescending(p => p.Id)
+                : query.OrderBy(p => p.Id);
+            
+          var products = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
 
            return TypedResults.Ok(new {
              products,
-             totalProducts
+             totalProducts,
+             totalFilteredProducts
            });
         }
 
        private static async Task<IResult> CreateProduct(Product product, ProductDb db) {
-                await db.Products.AddAsync(product);
-                await db.SaveChangesAsync();
-                return TypedResults.Ok(new {
-                    message = "Product added successfully",
-                    product
+
+            try {
+                    await db.Products.AddAsync(product);
+                    await db.SaveChangesAsync();
+                    return TypedResults.Ok(new {
+                        message = "Product added successfully",
+                        product
+                    });
+            }
+            catch(Exception e) {
+                return TypedResults.BadRequest(new {
+                    message = "Error adding product",
+                    error = e.Message
                 });
+            }
         }
 
        private static async Task<IResult> UpdateProduct(int id, Product product, ProductDb db) {

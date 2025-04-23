@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var dbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
+// Services
 builder.Services
     .AddDbContext<ProductDb>(
         opt => opt.UseNpgsql(dbConnectionString
@@ -58,7 +59,9 @@ app.UseCors(AllowedOrigins);
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Routes
 ProductRoute.Map(app);
 CategoryRoute.Map(app);
+DashboardRoute.Map(app);
 
 app.Run();
