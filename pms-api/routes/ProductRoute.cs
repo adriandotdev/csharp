@@ -8,7 +8,7 @@ namespace Route {
         public static void Map(WebApplication app) {
             var products = app.MapGroup("/api/v1/products");
 
-            products.MapGet("/", GetProducts);
+            products.MapGet("/", GetProducts).RequireAuthorization("admin_auth");
 
             products.MapPost("/", CreateProduct);
 
@@ -19,7 +19,7 @@ namespace Route {
 
         private static async Task<IResult> DeleteProduct(int id, ProductDb db)
         {
-                var product = await db.Products.FindAsync(id);
+            var product = await db.Products.FindAsync(id);
 
             if (product is null) {
                 return TypedResults.NotFound();
@@ -41,7 +41,7 @@ namespace Route {
 
             if (!string.IsNullOrEmpty(filter)) {
 
-                totalFilteredProducts = await db.Products.FromSqlRaw($@"
+                totalFilteredProducts = await db.Products.FromSqlInterpolated($@"
                 SELECT 
                     p.""Id"", 
                     p.""Name"", 
@@ -53,9 +53,9 @@ namespace Route {
                 FROM 
                     ""Products"" AS p
                 INNER JOIN ""Categories"" AS c ON c.""Id"" = p.""CategoryId""
-                WHERE p.""Name"" ILIKE @columnValue", columnValue).CountAsync();
+                WHERE p.""Name"" ILIKE {'%' + filter + '%'}").CountAsync();
                 
-                query = db.Products.FromSqlRaw($@"
+                query = db.Products.FromSqlInterpolated($@"
                 SELECT 
                     p.""Id"", 
                     p.""Name"", 
@@ -67,7 +67,7 @@ namespace Route {
                 FROM 
                     ""Products"" AS p
                 INNER JOIN ""Categories"" AS c ON c.""Id"" = p.""CategoryId""
-                WHERE p.""Name"" ILIKE @columnValue", columnValue).Select(product => new Product() {
+                WHERE p.""Name"" ILIKE {'%' + filter + '%'}").Select(product => new Product() {
                     Id = product.Id, 
                     Name = product.Name, 
                     Price = product.Price, 
