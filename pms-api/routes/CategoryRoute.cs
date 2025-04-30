@@ -9,7 +9,7 @@ namespace Route {
 
             var categories = app.MapGroup("/api/v1/categories");
 
-            categories.MapGet("/", GetCategories);
+            categories.MapGet("/", GetCategories).RequireAuthorization("user_auth");
             categories.MapPost("/", CreateCategory);
         }
 

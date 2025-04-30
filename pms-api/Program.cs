@@ -1,5 +1,7 @@
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Route;
 
 
@@ -7,7 +9,12 @@ var AllowedOrigins = "allowed_origins";
 
 var builder = WebApplication.CreateBuilder(args);
 
+var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+var appName = config["AppSettings:ApplicationName"];
+
 var dbConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+Console.WriteLine(builder.Configuration["Authentication:JwtSecretKey"]);
 
 // Services
 builder.Services
@@ -15,6 +22,7 @@ builder.Services
         opt => opt.UseNpgsql(dbConnectionString
     ));
 
+// CORS
 builder.Services
     .AddCors(
         options => {
@@ -23,14 +31,22 @@ builder.Services
         });
     });
 
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer()
-    .AddJwtBearer("LocalAuthIssuer", options =>
+builder.Services.AddAuthentication(options =>
     {
-        options.Authority = builder.Configuration
-        ["Authentication:Schemes:LocalAuthIssuer:ValidIssuer"];
-        options.Audience = builder.Configuration["Authentication:Schemes:LocalAuthIssuer:ValidAudience"];
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    }).AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = "yanyan-pms",
+            ValidAudience = "pms",
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Authentication:JwtSecretKey"]))
+        };
     });
 
 builder.Services.AddAuthorization();
@@ -63,5 +79,6 @@ app.UseAuthorization();
 ProductRoute.Map(app);
 CategoryRoute.Map(app);
 DashboardRoute.Map(app);
+AuthRoute.Map(app);
 
 app.Run();
