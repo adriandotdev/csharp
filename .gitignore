@@ -4,6 +4,7 @@ obj/
 Debug/
 Release/
 
+/pms-api/*
 # Ignore Visual Studio files
 .vs/
 *.suo
